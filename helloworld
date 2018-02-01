@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+# Mainly using this as a test file for git edits, permissions options, etc.
+
+print "Hello world!"
+print "Let's have some fun"
