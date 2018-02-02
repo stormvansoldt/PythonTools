@@ -12,9 +12,13 @@ def srv_init( host , port , sock ):
 	will listen on, and is passed in the command line.
 	HOST is set to localhost (specifically '127.0.0.1') by default
 	'''
-	sock.bind((host , port))
-	sock.listen(1)
-	(conn , addr) = sock.accept()
+	try:
+		sock.bind((host , port))
+		sock.listen(1)
+		(conn , addr) = sock.accept()
+	except OSError as e:
+		print ('Error: this port is unavailable')
+		return 0
 
 	while True:
 		try:
@@ -31,7 +35,11 @@ def client_init( host , port , sock ):
 	'''
 	Initializes the connection to the remote host on specified port number. 
 	'''
-	sock.connect((host , port))
+	try:
+		sock.connect((host , port))
+	except ConnectionRefusedError as e:
+		print ('Error: unable to reach remote host')
+		return 0
 
 	while True:
 		try:
@@ -71,6 +79,7 @@ def main():
 	args 	= parser.parse_args()
 	sock 	= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+	# This is a debugging message - delete when finished
 	print(args)
 
 	if args.listen:
