@@ -2,8 +2,23 @@
 
 import argparse
 import socket
-
+import sys
+import threading
 # TODO: Fix the rest of the argparse args, add nonblocking IO to server and client
+
+def send_msg(conn):
+	while True:
+		data = input() + '\n'
+		if not data:
+			break
+		conn.sendall(data.encode('utf-8'))
+
+def recv_msg(conn):
+	while True:
+		msg = ((conn.recv(1024)).strip(b'\n')).decode('utf-8')
+		if not msg:
+			break
+		print(msg)
 
 def srv_init( host , port , sock ):
 	'''
@@ -20,16 +35,14 @@ def srv_init( host , port , sock ):
 		print ('Error: this port is unavailable')
 		return 0
 
-	while True:
-		try:
-			msg = ((conn.recv(4096)).strip(b'\n')).decode('utf-8')
-			print ('> ' + msg)
-		except KeyboardInterrupt:
-			print ('\nThanks for playing!')
-			break
+	t_recv = threading.Thread(target=recv_msg, args=[conn])
+	t_send = threading.Thread(target=send_msg, args=[conn])
+	t_recv.start()
+	t_send.start()
 
 	sock.close()
 	return 0
+
 
 def client_init( host , port , sock ):
 	'''
@@ -75,7 +88,6 @@ def main():
 						dest='listen',
 						help='listen for a connection')
 
-	msg		= ''
 	args 	= parser.parse_args()
 	sock 	= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
