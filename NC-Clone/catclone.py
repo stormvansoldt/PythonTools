@@ -4,18 +4,19 @@ import argparse
 import socket
 import sys
 import threading
-# TODO: Fix the rest of the argparse args, add nonblocking IO to server and client
 
-def send_msg(conn):
+# TODO: Fix the rest of the argparse args, add nonblocking IO to the client
+
+def send_msg(c):
 	while True:
 		data = input() + '\n'
 		if not data:
 			break
-		conn.sendall(data.encode('utf-8'))
+		c.sendall(data.encode('utf-8'))
 
-def recv_msg(conn):
+def recv_msg(c):
 	while True:
-		msg = ((conn.recv(1024)).strip(b'\n')).decode('utf-8')
+		msg = ((c.recv(1024)).strip(b'\n')).decode('utf-8')
 		if not msg:
 			break
 		print(msg)
@@ -49,18 +50,15 @@ def client_init( host , port , sock ):
 	Initializes the connection to the remote host on specified port number. 
 	'''
 	try:
-		sock.connect((host , port))
+		conn = socket.create_connection((host , port))
 	except ConnectionRefusedError as e:
 		print ('Error: unable to reach remote host')
 		return 0
 
-	while True:
-		try:
-			msg = input() + '\n'
-			sock.sendall(msg.encode(encoding='utf-8'))
-		except KeyboardInterrupt:
-			print('\nThanks for playing!')
-			break
+	t_recv = threading.Thread(target=recv_msg, args=[conn])
+	t_send = threading.Thread(target=send_msg, args=[conn])
+	t_recv.start()
+	t_send.start()
 
 	sock.close()
 	return 0
