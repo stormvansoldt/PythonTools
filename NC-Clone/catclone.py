@@ -7,38 +7,36 @@ import threading
 import time
 
 '''
-TODO: 	Fix the argparse options, add SIGINT/KeyboardInterrupt handling,
-		clean up the ugly/redundant code.
+TODO: 	Refactor ugly and redundant code
 '''
 
 def send_msg( c ):
 	while True:
 		data = input() + '\n'
-		if not data:
-			break
 		c.sendall(data.encode('utf-8'))
 
 def recv_msg( c ):
 	while True:
-		data = ((c.recv(1024)).strip(b'\n')).decode('utf-8')
+		data = (c.recv(1024)).decode('utf-8')
 		if not data:
+			print('[*] Connection closed by remote host')
 			break
-		print(data)
+		print(data.strip('\n'))
 
 def srv_init( addr ):
 	'''
 	If the program can successfully bind to a local host/port, return the
-	connection object and close the original socket. Else, return 0
+	connection object and close the original socket. Else, return 1
 	'''
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	try:
 		sock.bind(addr)
 	except OSError:
-		print('Error: this port is unavailable')
+		print('[!] Error: this port is unavailable')
 		return 1
 	except PermissionError:
-		print('Error: this port requires elevated permissions')
+		print('[!] Error: this port requires elevated permissions')
 		return 1
 	else:
 		sock.listen(1)
@@ -50,12 +48,12 @@ def srv_init( addr ):
 def client_init( addr ):
 	'''
 	If a successful connection is created, return the socket object containing
-	the connection. Else, return 0
+	the connection. Else, return 1
 	'''
 	try:
 		return socket.create_connection(addr)
-	except ConnectionRefusedError as e:
-		print ('Error: unable to reach remote host')
+	except ConnectionRefusedError:
+		print ('[!] Error: unable to reach remote host')
 		return 1
 
 def main():
@@ -66,7 +64,7 @@ def main():
 	correct arguments.
 
 	Then we get the socket object and create two new threads: one for receiving
-	data, and one for catching STDIN and sending it to the remote client/server
+	data, and one for catching STDIN and sending it to the remote client/server.
 	'''
 	parser = argparse.ArgumentParser(
 		   description='Simple copy of nc written in Python.')
@@ -101,10 +99,9 @@ def main():
 	t_send.start()
 
 	try:
-		while True:
-			time.sleep(0.5)
+		t_recv.join()
 	except KeyboardInterrupt:
-		sys.exit('Quitting program')
+		sys.exit('\n[*] Thanks for using CatClone!')
 	finally:
 		conn.close()
 
