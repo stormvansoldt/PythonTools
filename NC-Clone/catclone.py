@@ -4,15 +4,17 @@ import argparse
 import socket
 import sys
 import threading
+import time
 
-# TODO: Fix the argparse options, add exception handling/KeyboardInterrupt, 
-# clean up the ugly code
+'''
+TODO: 	Fix the argparse options, add SIGINT/KeyboardInterrupt handling,
+		clean up the ugly/redundant code.
+'''
 
 def send_msg( c ):
 	while True:
 		data = input() + '\n'
 		if not data:
-			print('send_msg got no data!')
 			break
 		c.sendall(data.encode('utf-8'))
 
@@ -20,7 +22,6 @@ def recv_msg( c ):
 	while True:
 		data = ((c.recv(1024)).strip(b'\n')).decode('utf-8')
 		if not data:
-			print('recv_msg got no data!')
 			break
 		print(data)
 
@@ -94,10 +95,18 @@ def main():
 	if conn == 1:
 		sys.exit()
 
-	t_recv = threading.Thread(target=recv_msg, args=[conn])
-	t_send = threading.Thread(target=send_msg, args=[conn])
+	t_recv 	= threading.Thread(target=recv_msg, args=[conn], daemon=True)
+	t_send 	= threading.Thread(target=send_msg, args=[conn], daemon=True)
 	t_recv.start()
 	t_send.start()
+
+	try:
+		while True:
+			time.sleep(0.5)
+	except KeyboardInterrupt:
+		sys.exit('Quitting program')
+	finally:
+		conn.close()
 
 if __name__ == '__main__':
 	main()
