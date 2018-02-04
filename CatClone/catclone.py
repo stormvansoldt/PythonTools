@@ -4,7 +4,6 @@ import argparse
 import socket
 import sys
 import threading
-import time
 
 '''
 TODO: 	Refactor ugly and redundant code
