@@ -5,63 +5,57 @@ import socket
 import sys
 import threading
 
-# TODO: Fix the rest of the argparse args, add nonblocking IO to the client
+# TODO: Fix the argparse options, add exception handling/KeyboardInterrupt, 
+# clean up the ugly code
 
-def send_msg(c):
+def send_msg( c ):
 	while True:
 		data = input() + '\n'
 		if not data:
+			print('send_msg got no data!')
 			break
 		c.sendall(data.encode('utf-8'))
 
-def recv_msg(c):
+def recv_msg( c ):
 	while True:
-		msg = ((c.recv(1024)).strip(b'\n')).decode('utf-8')
-		if not msg:
+		data = ((c.recv(1024)).strip(b'\n')).decode('utf-8')
+		if not data:
+			print('recv_msg got no data!')
 			break
-		print(msg)
+		print(data)
 
-def srv_init( host , port , sock ):
+def srv_init( addr ):
 	'''
-	This initializes the bind socket when 'nccopy -l' is used. The port param
-	in the function declaration determines the port number that the script
-	will listen on, and is passed in the command line.
-	HOST is set to localhost (specifically '127.0.0.1') by default
+	If the program can successfully bind to a local host/port, return the
+	connection object and close the original socket. Else, return 0
 	'''
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 	try:
-		sock.bind((host , port))
+		sock.bind(addr)
+	except OSError:
+		print('Error: this port is unavailable')
+		return 1
+	except PermissionError:
+		print('Error: this port requires elevated permissions')
+		return 1
+	else:
 		sock.listen(1)
-		(conn , addr) = sock.accept()
-	except OSError as e:
-		print ('Error: this port is unavailable')
-		return 0
+		(conn , destination) = sock.accept()
+		return conn
+	finally:
+		sock.close()
 
-	t_recv = threading.Thread(target=recv_msg, args=[conn])
-	t_send = threading.Thread(target=send_msg, args=[conn])
-	t_recv.start()
-	t_send.start()
-
-	sock.close()
-	return 0
-
-
-def client_init( host , port , sock ):
+def client_init( addr ):
 	'''
-	Initializes the connection to the remote host on specified port number. 
+	If a successful connection is created, return the socket object containing
+	the connection. Else, return 0
 	'''
 	try:
-		conn = socket.create_connection((host , port))
+		return socket.create_connection(addr)
 	except ConnectionRefusedError as e:
 		print ('Error: unable to reach remote host')
-		return 0
-
-	t_recv = threading.Thread(target=recv_msg, args=[conn])
-	t_send = threading.Thread(target=send_msg, args=[conn])
-	t_recv.start()
-	t_send.start()
-
-	sock.close()
-	return 0
+		return 1
 
 def main():
 	'''
@@ -69,6 +63,9 @@ def main():
 	args passed via the command line, associate them with flags, generate a
 	usage output, and yell at the user if they don't provide sufficient and/or
 	correct arguments.
+
+	Then we get the socket object and create two new threads: one for receiving
+	data, and one for catching STDIN and sending it to the remote client/server
 	'''
 	parser = argparse.ArgumentParser(
 		   description='Simple copy of nc written in Python.')
@@ -87,15 +84,20 @@ def main():
 						help='listen for a connection')
 
 	args 	= parser.parse_args()
-	sock 	= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-	# This is a debugging message - delete when finished
-	print(args)
+	addr 	= (args.host, args.port)
 
 	if args.listen:
-		srv_init(args.host, args.port, sock)
+		conn = srv_init(addr)
 	else:
-		client_init(args.host, args.port, sock)
+		conn = client_init(addr)
+
+	if conn == 1:
+		sys.exit()
+
+	t_recv = threading.Thread(target=recv_msg, args=[conn])
+	t_send = threading.Thread(target=send_msg, args=[conn])
+	t_recv.start()
+	t_send.start()
 
 if __name__ == '__main__':
 	main()
