@@ -39,7 +39,9 @@ def srv_init( addr ):
 		return 1
 	else:
 		sock.listen(1)
-		(conn , destination) = sock.accept()
+		print('[*] Listening on {0!s}:{1!s}...'.format(addr[0], addr[1]))
+		(conn , dest) = sock.accept()
+		print('[*] Received connection from {0!s} on port {1!s}!'.format(dest[0], dest[1]))
 		return conn
 	finally:
 		sock.close()
@@ -50,10 +52,13 @@ def client_init( addr ):
 	the connection. Else, return 1
 	'''
 	try:
-		return socket.create_connection(addr)
+		conn = socket.create_connection(addr)
 	except ConnectionRefusedError:
 		print ('[!] Error: unable to reach remote host')
 		return 1
+	else:
+		print('[*] Connected to {0!s}!'.format(addr[0]))
+		return conn
 
 def main():
 	'''
