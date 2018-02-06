@@ -85,7 +85,7 @@ def main():
 
 	We then tell our program to wait for the receive thread to finish its loop
 	before closing out. Since we set the daemonic arg in both threads to True,
-	ending the program will ensure both threads are killed.
+	ending the program this way will ensure all threads are killed.
 	'''
 	parser = argparse.ArgumentParser(
 		   description='Simple copy of nc written in Python.')
