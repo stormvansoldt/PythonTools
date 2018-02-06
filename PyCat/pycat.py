@@ -88,7 +88,7 @@ def main():
 	ending the program this way will ensure all threads are killed.
 	'''
 	parser = argparse.ArgumentParser(
-		   description='Simple copy of nc written in Python.')
+		   description='Simple copy of netcat written in Python.')
 	parser.add_argument('host',
 						type=str,
 						default='127.0.0.1',
@@ -122,7 +122,7 @@ def main():
 	try:
 		t_recv.join()
 	except KeyboardInterrupt:
-		sys.exit('\n[*] Thanks for using CatClone!')
+		sys.exit('\n[*] Thanks for using PyCat!')
 	finally:
 		conn.close()
 
