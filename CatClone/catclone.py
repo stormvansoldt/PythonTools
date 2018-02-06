@@ -10,11 +10,24 @@ TODO: 	Refactor ugly and redundant code
 '''
 
 def send_msg( c ):
+	'''
+	One of the two threads that are kicked off when a connection is established.
+	Simply waits for input from STDIN, adds a newline character, then encodes the
+	message to a bytecode format before sending it to the remote host.
+	'''
 	while True:
 		data = input() + '\n'
 		c.sendall(data.encode('utf-8'))
 
 def recv_msg( c ):
+	'''
+	The second of two threads that run while a remote connection has been made.
+	Waits for a message from the remote host with a 1024 byte buffer size, then
+	decodes it into a string format before saving it into the data variable.
+	Then we check to see if there is no data; if this is the case, we assume
+	the connection has been closed. Otherwise, we print the message and go back
+	into our loop.
+	'''
 	while True:
 		data = (c.recv(1024)).decode('utf-8')
 		if not data:
@@ -69,6 +82,10 @@ def main():
 
 	Then we get the socket object and create two new threads: one for receiving
 	data, and one for catching STDIN and sending it to the remote client/server.
+
+	We then tell our program to wait for the receive thread to finish its loop
+	before closing out. Since we set the daemonic arg in both threads to True,
+	ending the program will ensure both threads are killed.
 	'''
 	parser = argparse.ArgumentParser(
 		   description='Simple copy of nc written in Python.')
