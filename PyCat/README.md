@@ -2,7 +2,7 @@
 
 My version of netcat, but written in Python. Requires Python 3.
 
-**Usage:** ./pycat.py [-h] [-l] <HOST> <PORT>
+**Usage:** ./pycat.py [-h] [-l] HOST PORT
 
 **Positional arguments:**<br />
 HOST: remote or local destination to connect/bind to<br />
