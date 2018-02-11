@@ -4,6 +4,24 @@ import sys
 import socket
 import threading
 
+# TODO: Implement the sexy_hex function
+
+def sexy_hex(in_str):
+	'''
+	Take an input string (from either end of the data stream) and turn it 
+	into a sexy output string showing the starting value, the hex value for
+	each character, and the character string represented by the hex value.
+	'''
+	output_str	= ''
+	LENGTH 		= 16
+	chunks 		= [src[i:i+LENGTH] for i in range(0, len(src), LENGTH)]
+
+	for index, chunk in enumerate(chunks):
+		hex_str = ' '.join(['{:02X}'.format(ord(x)) for x in chunk])
+		output_str += ('{0:#0{1}x}  {2:<50}{3}\n'.format(index, 4, hex_str, chunk))
+
+	return(output_str)
+
 def local_handler(l_sock, r_sock):
 	'''
 	Performs a recv() on the local socket, prints it, then pipes it to the
