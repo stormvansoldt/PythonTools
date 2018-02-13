@@ -5,7 +5,7 @@ import socket
 import threading
 import argparse
 
-# TODO: Implement the sexy_hex function
+# TODO: Possibly refactor remote_handler and local_handler into one function
 
 def sexy_hex(in_bytes):
 	'''
@@ -31,8 +31,8 @@ def sexy_hex(in_bytes):
 
 def local_handler(l_sock, r_sock):
 	'''
-	Performs a recv() on the local socket, prints it, then pipes it to the
-	remote socket.
+	Performs a recv() on the local socket. Sexifies that data and prints it,
+	then sends the raw data out to the remote host.
 	'''
 	while True:
 		data = l_sock.recv(1024)
@@ -45,8 +45,8 @@ def local_handler(l_sock, r_sock):
 
 def remote_handler(l_sock, r_sock):
 	'''
-	Performs a recv() on the remote socket, prints the result, then pipes it 
-	to the local socket.
+	Performs a recv() on the remote socket. Sexifies that data and prints it,
+	then sends the raw data back to the local client.
 	'''
 	while True:
 		data = r_sock.recv(1024)
@@ -112,9 +112,9 @@ def proxy_handler():
 		t_remote.join()
 		t_local.join()
 	except KeyboardException:
-		print('SIGINT caught.')
+		print('[!] SIGINT caught')
 	finally:
-		print('Byebye!')
+		print('[*] Closing socket connections')
 		l_conn.close()
 		r_conn.close()
 		sock.close()
