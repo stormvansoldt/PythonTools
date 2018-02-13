@@ -1,8 +1,18 @@
 # PyDump
 
-Creates a simple man-in-the-middle so we can proxy any TCP requests to or from a remote host. This README will be updated with usage instructions and examples once the script is completely finished. It currently supports basic proxying abilities, but both server/port combos are currently hardcoded since I haven't created the argparse setup for this library yet.
+Creates a simple man-in-the-middle so we can proxy any TCP requests to or from a remote host.
+
+**Usage:** ./pydump.py [-h] PORT TARGET
+
+**Positional arguments:**<br />
+PORT: local port to bind the listener to<br />
+TARGET: remote host to connect to in the form of (IP:PORT)
+
+**Optional arguments:**<br />
+-h: show this help message and exit<br />
+
+**Examples:**<br />
+./pydump.py 9001 192.168.0.35:22
 
 TODO:
-- Add some sexy hexdumping to the requests
-- Set up argparse for the remote host and the listening port
 - Refactor code
