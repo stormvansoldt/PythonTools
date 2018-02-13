@@ -6,6 +6,7 @@ import threading
 import argparse
 
 # TODO: Possibly refactor remote_handler and local_handler into one function
+#		Add on-the-fly data manipulation
 
 def sexy_hex(in_bytes):
 	'''
