@@ -6,7 +6,7 @@ import threading
 
 # TODO: Implement the sexy_hex function
 
-def sexy_hex(in_str):
+def sexy_hex(in_bytes):
 	'''
 	Take an input string (from either end of the data stream) and turn it 
 	into a sexy output string showing the starting value, the hex value for
@@ -14,7 +14,8 @@ def sexy_hex(in_str):
 	'''
 	output_str	= ''
 	LENGTH 		= 16
-	chunks 		= [src[i:i+LENGTH] for i in range(0, len(src), LENGTH)]
+	in_str		= in_bytes.decode('UTF-8').strip('\n')
+	chunks 		= [in_str[i:i+LENGTH] for i in range(0, len(in_str), LENGTH)]
 
 	for index, chunk in enumerate(chunks):
 		hex_str = ' '.join(['{:02X}'.format(ord(x)) for x in chunk])
@@ -31,8 +32,9 @@ def local_handler(l_sock, r_sock):
 		data = l_sock.recv(1024)
 		if not data:
 			break
-		print('Received from lhost: {}'.format(data))
+		print('[^] Recieved X bytes from localhost\n{}'.format(sexy_hex(data)))
 		r_sock.sendall(data)
+		print('[<--] Sent X bytes to remote host')
 
 def remote_handler(l_sock, r_sock):
 	'''
@@ -43,8 +45,9 @@ def remote_handler(l_sock, r_sock):
 		data = r_sock.recv(1024)
 		if not data:
 			break
-		print('Received from rhost: {}'.format(data))
+		print('[^] Recieved X bytes from remote\n{}'.format(sexy_hex(data)))
 		l_sock.sendall(data)
+		print('[-->] Sent X bytes to localhost')
 
 def proxy_handler():
 	'''
@@ -67,12 +70,12 @@ def proxy_handler():
 	sock.bind((lhost, lport))
 	sock.listen(1)
 	
-	print('Waiting for local connection...')
+	print('[*] Waiting for local connection...')
 	(l_conn, l_addr) = sock.accept()
 
-	print('Received connection from {0!s}:{1!s}'.format(l_addr[0], l_addr[1]))
+	print('[*] Received connection from {0!s}:{1!s}'.format(l_addr[0], l_addr[1]))
 	
-	print('Connecting to rhost {0!s}:{1!s}...'.format(rhost, rport))
+	print('[*] Connecting to rhost {0!s}:{1!s}...'.format(rhost, rport))
 	r_conn		= socket.create_connection((rhost, rport))
 
 	print('-----------------------------------------')
