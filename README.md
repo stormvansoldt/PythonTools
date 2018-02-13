@@ -11,3 +11,7 @@ Please note that all testing for these scripts was done using Python 3.6.2. I ca
 ## PyCat
 
 PyCat is basically what it sounds like - a clone of the popular tool netcat. My main goals for this project have nearly been completed at the time of updating this README, which was to gain a better understanding of how low-level networking sockets work. This isn't a completely fleshed out remake (yet(?)), but does support basic server/client features of netcat. Usage and examples can be found in the README in the PyCat folder.
+
+## PyDump
+
+A TCP proxy that allows us to intercept all TCP traffic to and from a remote connection. This script will take the data in-transit, and print both the ASCII and hex representations of said data to the console. Just like the other scripts, usage and examples can be found in the README of the PyDump folder.
