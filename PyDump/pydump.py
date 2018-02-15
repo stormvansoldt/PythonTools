@@ -7,6 +7,7 @@ import argparse
 
 # TODO: Possibly refactor remote_handler and local_handler into one function
 #		Add on-the-fly data manipulation
+#		Fix the super ugly "Connection received" print output
 
 def sexy_hex(in_bytes):
 	'''
@@ -100,10 +101,10 @@ def proxy_handler():
 	print('[*] Connecting to {0!s}:{1!s}...'.format(r_host, r_port))
 	r_conn		= socket.create_connection((r_host, r_port))
 
-	print('\n-----------------------------------------')
-	print('| {0!s}:{1!s} =====> {2!s}:{3!s} |'.format(l_addr[0], l_addr[1], r_host, r_port))
-	print('| Connection established!               |')
-	print('-----------------------------------------\n')
+	print('\n------------------------------------------')
+	print('| {0!s}:{1!s} =====> {2!s}:{3!s}  |'.format(l_addr[0], l_addr[1], r_host, r_port))
+	print('| Connection established!                |')
+	print('------------------------------------------\n')
 
 	t_remote	= threading.Thread(target=remote_handler, args=[l_conn, r_conn], daemon=True)
 	t_local		= threading.Thread(target=local_handler, args=[l_conn, r_conn], daemon=True)
