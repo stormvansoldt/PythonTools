@@ -19,13 +19,13 @@ def sexy_hex(in_bytes):
 	'''
 	output_str	= ''
 	LENGTH 		= 16
-	in_str		= in_bytes.decode('UTF-8').strip('\n')
-	output_len	= len(in_str)
-	chunks 		= [in_str[i:i+LENGTH] for i in range(0, len(in_str), LENGTH)]
+	output_len	= len(in_bytes)
+	chunks 		= [in_bytes[i:i+LENGTH] for i in range(0, len(in_bytes), LENGTH)]
 
 	for index, chunk in enumerate(chunks):
-		hex_str 	= ' '.join(['{:02X}'.format(ord(x)) for x in chunk])
-		output_str += ('{0:#0{1}x}  {2:<50}{3}\n'.format(index, 4, hex_str, chunk))
+		hexd 		= ' '.join(['{:02X}'.format(x) for x in chunk])
+		text		= ''.join([chr(x) if 32 <= x < 127 else '.' for x in chunk])
+		output_str += ('{0:#0{1}x}  {2:<50}{3}\n'.format(index, 4, hexd, text))
 
 	output_str 	= output_str.rstrip('\n')
 	return((output_str, output_len))
@@ -65,7 +65,8 @@ def proxy_handler():
 	sent and received through the connection to sniff for cool stuff.
 
 	After the connections are established, create two new threads using
-	remote_handler and local_handler to output from both ends of the pipe.
+	remote_handler and local_handler to handle the data being sent and
+	received through the proxy.
 
 	Using the try:catch block waits for one/both of the threads using 
 	thread.join(). Since the threads are daemonized, we ensure both are
@@ -99,7 +100,7 @@ def proxy_handler():
 	print('[*] Connecting to {0!s}:{1!s}...'.format(r_host, r_port))
 	r_conn		= socket.create_connection((r_host, r_port))
 
-	print('-----------------------------------------')
+	print('\n-----------------------------------------')
 	print('| {0!s}:{1!s} =====> {2!s}:{3!s} |'.format(l_addr[0], l_addr[1], r_host, r_port))
 	print('| Connection established!               |')
 	print('-----------------------------------------\n')
