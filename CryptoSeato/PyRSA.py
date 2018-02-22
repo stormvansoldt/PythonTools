@@ -15,12 +15,6 @@ def generate_keypair():
 	Returns a tuple containing the keypair in the form (pub_key, priv_key)
 	'''
 	path			= os.path.expanduser('~/') + '.pykeys/'
-	key_password 	= input('[*] Enter a password to secure your private key: ')
-	validate_pass	= input('[*] Verify password: ')
-
-	if key_password != validate_pass:
-		print('[!] Passwords don\'t match!')
-		return 1
 
 	if os.path.isfile(path + 'private.key'):
 		print('[!] WARNING: it looks like a private and/or public key already exists. If you continue, those keys will be overwritten!')
@@ -38,10 +32,9 @@ def generate_keypair():
 
 	print('[*] Generating RSA keypair...')
 	
-	key 		 	= RSA.generate(4096)
+	key 		 	= RSA.generate(2048)
 	pub_key			= key.publickey().exportKey()
-	priv_key		= key.exportKey(passphrase=key_password,
-									pkcs=8,
+	priv_key		= key.exportKey(pkcs=8,
 									protection='scryptAndAES128-CBC')
 
 	if not os.path.isdir(path):
@@ -87,11 +80,10 @@ def rsa_decrypt(enc_key):
 
 	THIS WILL BE RUN ON THE CLIENT.
 	'''
-	key_password 	= input('[*] Enter password to unlock private.key: ')
 	path			= os.path.expanduser('~/') + '.pykeys/'
 
 	with open(path + 'private.key', 'rb') as keyfile:
-		priv_key = RSA.importKey(keyfile.read(), passphrase=key_password)
+		priv_key = RSA.importKey(keyfile.read())
 
 	rsa_cipher = PKCS1_OAEP.new(priv_key)
 
