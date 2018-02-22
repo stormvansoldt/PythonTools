@@ -6,22 +6,34 @@ import PyRSA
 from Crypto.Random import get_random_bytes
 
 '''
-This module has functions that will perform the necessary handling of 
-the private key exchange and generation of passphrases.
+This module has the functions needed to handle the initialization of the
+encryption libray. Here is a simple walkthrough of the init process:
 
-1. Client connects to server
-2. Client generates RSA keypair
-3. Client sends pubkey to server
-4. Server accepts pubkey
-5. Server generates session key
-6. Server encrypts session key
-7. Server sends encrypted session key to the client
-8. Client accepts session key
-9. Client decrypts session key
-10. Main loop begins
+ 1. Ensure a valid connection between the server and client.
+ 2. After connection is validated, the client creates the RSA keypair and
+ 	sends the public key to the server.
+ 3. The server accepts the public key from the client.
+ 4. The server generates a random sequence of 16 bytes to be used as the
+ 	AES encryption key for the remainder of the session.
+ 5. Server encrypts the session key using the client's public RSA key
+ 6. Encrypted session key is sent back to the client.
+ 7. Client decrypts the AES key using the private RSA key.
+ 8. Both ends of the connection now have the session key, and the encrypted
+ 	communication can begin.
+
 '''
 
-def server_handler(l_host, l_port):
+def server_handler(l_host, l_port, conn):
+	'''
+	Receive an RSA public key from the client, generate a 128-bit AES session
+	key, encrypt it with the public key, then send it back to the client.
+
+	Keyword arguments:
+	conn -- socket object representing the connection to the client.
+	
+	Returns:
+	 session_key -- bytestring of the AES key
+	'''
 	sock 		= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind((l_host, l_port))
 
@@ -49,24 +61,36 @@ def server_handler(l_host, l_port):
 	return session_key
 
 
-def client_handler(r_host, r_port):
-	print('Attempting to connect to remote host...')
+def client_handler(r_host, r_port, conn):
+	'''
+	Generate a 2048-bit RSA keypair, send the public key to the server,
+	receive the encrypted AES session key as a response, then decrypt it
+	using the private RSA key.
+
+	Keyword arguments:
+	 conn -- socket object representing the connection to the server.
+
+	Returns:
+	 session_key -- bytestring of the AES key
+	'''
+	print('[ ] Attempting to connect to remote host...')
 	conn 	= socket.create_connection((r_host, r_port))
-	print('Connected to server!')
+	print('[*] Connected to server!')
 
-	print('Begin RSA key generation...')
+	print('[ ] Generating the RSA keypair...')
 	(pub_key, priv_key) = PyRSA.generate_keypair()
+	print('[*] Keypair generated!')
 
-	print('Sending RSA public key to server')
+	print('[ ] Sending public key to the server...')
 	conn.sendall(pub_key)
 
-	print('Waiting to receive the encrypted session key...')
-	enc_session_key 	= conn.recv(4096)
+	print('[ ] Waiting to receive the encrypted session key...')
+	enc_session_key 	= conn.recv(2048)
 
-	print('Received encrypted session key!')
+	print('[*] Received encrypted session key!')
 	session_key 		= PyRSA.rsa_decrypt(enc_session_key, priv_key)
 
-	print('Decrypted the session key!')
+	print('[*] Decrypted the session key!')
 	print(session_key)
 	print('Goodbye!')
 	conn.close()
