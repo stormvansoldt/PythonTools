@@ -12,7 +12,7 @@ def generate_keypair():
 	saved to ~/.pykeys/ in the user's home directory as "private.key" and
 	"public.key".
 
-	Returns 0 for successful key creation.
+	Returns a tuple containing the keypair in the form (pub_key, priv_key)
 	'''
 	path			= os.path.expanduser('~/') + '.pykeys/'
 	key_password 	= input('[*] Enter a password to secure your private key: ')
@@ -59,17 +59,16 @@ def generate_keypair():
 	print('[*] RSA keys successfully generated!')
 	print('[*] They have been stored in {}'.format(path))
 
-	return 0
+	return (pub_key, priv_key)
 
 
-def generate_sesh_key():
+def rsa_encrypt(key):
 	'''
 	Generate an AES-128 key to be used as the symmetric encryption key for the
 	remainder of the communication. We then encrypt this key with the public 
 	RSA key (which will be sent to us by the client), and return that encrypted
 	session key.
 	'''
-	sesh_key 	= get_random_bytes(16)
 	path		= os.path.expanduser('~/') + '.pykeys/'
 
 	with open(path + 'public.key', 'rb') as keyfile:
@@ -77,10 +76,10 @@ def generate_sesh_key():
 
 	rsa_cipher 	= PKCS1_OAEP.new(pub_key)
 
-	return rsa_cipher.encrypt(sesh_key)
+	return rsa_cipher.encrypt(key)
 
 
-def decrypt_session_key(enc_key):
+def rsa_decrypt(enc_key):
 	'''
 	Imports the private key, prompts for the passphrase, then uses the key
 	to decrypt the content of the data argument. Returns the decrypted plain-
@@ -99,6 +98,6 @@ def decrypt_session_key(enc_key):
 	return rsa_cipher.decrypt(enc_key)
 
 
-generate_keypair()
-aes_key = generate_sesh_key()
-print(decrypt_session_key(aes_key))
+#generate_keypair()
+#aes_key = generate_sesh_key()
+#print(decrypt_session_key(aes_key))
