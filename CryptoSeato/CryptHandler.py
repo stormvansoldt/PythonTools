@@ -2,7 +2,6 @@
 
 import sys
 import socket
-import threading
 import PyAES
 import PyRSA
 from Crypto.Random import get_random_bytes
@@ -23,9 +22,7 @@ the private key exchange and generation of passphrases.
 10. Main loop begins
 '''
 
-def server_handler():
-	l_host 		= '0.0.0.0'
-	l_port 		= 32123
+def server_handler(l_host, l_port):
 	sock 		= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	sock.bind((l_host, l_port))
 
@@ -33,23 +30,24 @@ def server_handler():
 	sock.listen(1)
 	
 	conn, addr	= sock.accept()
-	print('[*] Received connection from {}'.format(addr[0]))
+	print('[*] Received connection from {0}:{1}'.format(addr[0], addr[1]))
 
 	print('[ ] Waiting to receive client\'s public key...')
-	pub_key 	= conn.recv(4096)
-
+	pub_key 	= conn.recv(2048)
 	print('[*] Received public key!')
 
 	print('[ ] Generating AES session key and encrypting it with the public RSA key...')
 	session_key	= get_random_bytes(16)
 
 	print('[*] Sending AES key to client')
-	conn.sendall(PyRSA.rsa_encrypt(session_key))
+	conn.sendall(PyRSA.rsa_encrypt(session_key, pub_key))
 
 	print(session_key)
 	print('Adios!')
 	conn.close()
 	sock.close()
+
+	return session_key
 
 
 def client_handler(r_host, r_port):
@@ -58,7 +56,7 @@ def client_handler(r_host, r_port):
 	print('Connected to server!')
 
 	print('Begin RSA key generation...')
-	(priv_key, pub_key) = PyRSA.generate_keypair()
+	(pub_key, priv_key) = PyRSA.generate_keypair()
 
 	print('Sending RSA public key to server')
 	conn.sendall(pub_key)
@@ -67,18 +65,20 @@ def client_handler(r_host, r_port):
 	enc_session_key 	= conn.recv(4096)
 
 	print('Received encrypted session key!')
-	session_key 		= PyRSA.rsa_decrypt(enc_session_key)
+	session_key 		= PyRSA.rsa_decrypt(enc_session_key, priv_key)
 
 	print('Decrypted the session key!')
 	print(session_key)
 	print('Goodbye!')
 	conn.close()
 
+	return session_key
+
 def main():
 	arg = sys.argv[1]
 
 	if arg == 'l':
-		server_handler()
+		server_handler('0.0.0.0', 32123)
 	elif arg == 'c':
 		client_handler('127.0.0.1', 32123)
 	else:
