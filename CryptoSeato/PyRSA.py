@@ -49,8 +49,3 @@ def rsa_decrypt(enc_msg, priv_key):
 	rsa_cipher 	= PKCS1_OAEP.new(priv_key)
 
 	return rsa_cipher.decrypt(enc_msg)
-
-
-#generate_keypair()
-#aes_key = generate_sesh_key()
-#print(decrypt_session_key(aes_key))
