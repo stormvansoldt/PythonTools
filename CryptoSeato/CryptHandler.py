@@ -6,6 +6,9 @@ import PyRSA
 from Crypto.Random import get_random_bytes
 
 '''
+TODO:
+ - Test with an external module (probably PyCat or something like that) 
+
 This module has the functions needed to handle the initialization of the
 encryption libray. Here is a simple walkthrough of the init process:
 
@@ -23,25 +26,20 @@ encryption libray. Here is a simple walkthrough of the init process:
 
 '''
 
-def server_handler(l_host, l_port, conn):
+def server_handler(conn):
 	'''
 	Receive an RSA public key from the client, generate a 128-bit AES session
 	key, encrypt it with the public key, then send it back to the client.
 
 	Keyword arguments:
 	conn -- socket object representing the connection to the client.
-	
+
 	Returns:
 	 session_key -- bytestring of the AES key
 	'''
-	sock 		= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	sock.bind((l_host, l_port))
-
-	print('[ ] Waiting for remote connection...')
-	sock.listen(1)
-	
-	conn, addr	= sock.accept()
-	print('[*] Received connection from {0}:{1}'.format(addr[0], addr[1]))
+	if not conn:
+		print('[!] Error! Invalid connection was passed')
+		return 1
 
 	print('[ ] Waiting to receive client\'s public key...')
 	pub_key 	= conn.recv(2048)
@@ -53,15 +51,10 @@ def server_handler(l_host, l_port, conn):
 	print('[*] Sending AES key to client')
 	conn.sendall(PyRSA.rsa_encrypt(session_key, pub_key))
 
-	print(session_key)
-	print('Adios!')
-	conn.close()
-	sock.close()
-
 	return session_key
 
 
-def client_handler(r_host, r_port, conn):
+def client_handler(conn):
 	'''
 	Generate a 2048-bit RSA keypair, send the public key to the server,
 	receive the encrypted AES session key as a response, then decrypt it
@@ -73,14 +66,12 @@ def client_handler(r_host, r_port, conn):
 	Returns:
 	 session_key -- bytestring of the AES key
 	'''
-	print('[ ] Attempting to connect to remote host...')
-	conn 	= socket.create_connection((r_host, r_port))
-	print('[*] Connected to server!')
+	if not conn:
+		print('[!] Error! Invalid connection was provided')
+		return 1
 
-	print('[ ] Generating the RSA keypair...')
 	(pub_key, priv_key) = PyRSA.generate_keypair()
-	print('[*] Keypair generated!')
-
+	
 	print('[ ] Sending public key to the server...')
 	conn.sendall(pub_key)
 
@@ -91,19 +82,26 @@ def client_handler(r_host, r_port, conn):
 	session_key 		= PyRSA.rsa_decrypt(enc_session_key, priv_key)
 
 	print('[*] Decrypted the session key!')
-	print(session_key)
-	print('Goodbye!')
-	conn.close()
 
 	return session_key
+
 
 def main():
 	arg = sys.argv[1]
 
 	if arg == 'l':
-		server_handler('0.0.0.0', 32123)
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.bind(('0.0.0.0', 32123))
+		sock.listen(1)
+		conn, addr = sock.accept()
+		print(server_handler(conn))
+		conn.close()
+		sock.close()
+
 	elif arg == 'c':
-		client_handler('127.0.0.1', 32123)
+		conn = socket.create_connection(('127.0.0.1', 32123))
+		print(client_handler(conn))
+		conn.close()
 	else:
 		print('try again asshole')
 
