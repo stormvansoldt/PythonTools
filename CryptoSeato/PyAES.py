@@ -4,7 +4,7 @@ from Crypto.Util import Counter
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
-def encrypt(plain_input):
+def encrypt(plain_input, key):
 	'''
 	This function encrypts our incoming data using AES-128 CTR mode. First
 	we generate a nonce made out of 8 random bytes that will serve as the 
@@ -23,7 +23,7 @@ def encrypt(plain_input):
 
 	return ciphertext
 
-def decrypt(enc_input):
+def decrypt(enc_input, key):
 	'''
 	This function simply does the reverse of our encrypt_data function and
 	translates the incoming ciphertext into plaintext. The first 8 bytes of
