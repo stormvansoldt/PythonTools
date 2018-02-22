@@ -2,7 +2,6 @@
 
 import sys
 import socket
-import PyAES
 import PyRSA
 from Crypto.Random import get_random_bytes
 
