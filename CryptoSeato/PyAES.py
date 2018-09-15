@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 from Crypto.Util import Counter
 from Crypto.Cipher import AES

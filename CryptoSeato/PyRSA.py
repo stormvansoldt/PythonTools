@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
