@@ -44,11 +44,11 @@ def srv_init( addr ):
 
 	try:
 		sock.bind(addr)
-	except OSError:
-		print('[!] Error: this port is unavailable')
-		return 1
 	except PermissionError:
 		print('[!] Error: this port requires elevated permissions')
+		return 1
+	except OSError:
+		print('[!] Error: this port is unavailable')
 		return 1
 	else:
 		sock.listen(1)
