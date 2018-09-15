@@ -109,4 +109,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    print("We made it to main!")
