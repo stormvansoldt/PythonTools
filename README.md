@@ -16,3 +16,7 @@ PyCat is basically what it sounds like - a clone of the popular tool netcat. My 
 
 A TCP proxy that allows us to intercept all TCP traffic to and from a remote connection. This script will take the data in-transit, and print both the ASCII and hex representations of said data to the console. Just like the other scripts, usage and examples can be found in the README of the PyDump folder.
 
+## CryptoSeato
+
+CryptoSeato is a small library I made for implementing end-to-end encryption over an arbitrary socket connection. This is still in the testing phase as of right now and isn't fully usable just yet, but if you want to see how it works feel free to check out the scripts (there's a simple walkthrough of the process in CryptHandler.py)
+
